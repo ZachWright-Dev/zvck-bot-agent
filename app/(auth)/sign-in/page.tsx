@@ -20,7 +20,7 @@ function SignInContent() {
   const handleOAuthSignIn = (provider: 'google' | 'github') => {
     setOauthLoading(provider);
     setError(null);
-    signIn(provider, { callbackUrl });
+    signIn(provider, { callbackUrl }, provider === 'google' ? {prompt: 'select_account'}: undefined);
   };
 
   return (
