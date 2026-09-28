@@ -17,7 +17,7 @@ export async function POST(req: NextRequest){
         }).onConflictDoNothing({target: users.email}).returning();
 
         if(result.length === 0){
-            return NextResponse.json({message: "User already exists"}, {status:409});
+            return NextResponse.json({message: "User already exists"}, {status:200});
         }
 
         return NextResponse.json({message: "User successfully saved", user: result}, {status: 201})
