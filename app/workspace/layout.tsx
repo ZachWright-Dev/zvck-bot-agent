@@ -11,7 +11,7 @@ export default function WorkspaceLayout({ children }: { children: ReactNode }) {
           <SidebarTrigger />
           <span className="text-sm font-medium text-muted-foreground">Workspace</span>
         </header>
-        <div className="flex-1 p-5 sm:p-8">{children}</div>
+        <div className="min-w-0 flex-1 p-5 sm:p-8 has-data-[agent-space]:p-0">{children}</div>
       </SidebarInset>
     </SidebarProvider>
   );

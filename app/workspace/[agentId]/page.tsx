@@ -1,5 +1,5 @@
+import AgentSpace from "@/components/custom/workspace/agent-space/AgentSpace";
+
 export default function AgentPage() {
-    return (
-        <div>Agent Page</div>
-    );
+  return <AgentSpace />;
 }

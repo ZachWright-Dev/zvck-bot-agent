@@ -97,7 +97,7 @@ export default function AppSideBar() {
             <nav aria-labelledby="your-agents-label">
               <SidebarMenu className="gap-1">
                 {agents.map((agent) => {
-                  const href = `/workspace/agents/${agent.agentId}`;
+                  const href = `/workspace/${agent.agentId}`;
                   return (
                     <SidebarMenuItem key={agent.agentId}>
                       <SidebarMenuButton
