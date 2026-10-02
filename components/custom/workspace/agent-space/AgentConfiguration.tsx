@@ -36,14 +36,9 @@ function SettingsPanel() {
         <p className="mt-1 text-xs leading-5 text-muted-foreground">Give your agent a purpose and a little direction.</p>
       </div>
       <div className="space-y-2">
-        <Label htmlFor="agent-description" className="text-xs">Agent Description</Label>
-        <Textarea id="agent-description" defaultValue={previewAgent.description} rows={3} className="min-h-24 resize-y bg-background text-sm leading-6" />
-        <p className="text-[11px] leading-5 text-muted-foreground">A short summary of what your agent does.</p>
-      </div>
-      <div className="space-y-2">
-        <Label htmlFor="agent-instructions" className="text-xs">Agent Instructions</Label>
-        <Textarea id="agent-instructions" defaultValue={previewAgent.instructions} rows={10} className="min-h-56 resize-y bg-background text-sm leading-6" />
-        <p className="text-[11px] leading-5 text-muted-foreground">Describe its role, tone, and how you’d like it to respond.</p>
+        <Label htmlFor="agent-description-instructions" className="text-xs">Description and Instructions</Label>
+        <Textarea id="agent-description-instructions" defaultValue={previewAgent.descriptionAndInstructions} rows={12} className="min-h-64 resize-y bg-background text-sm leading-6" />
+        <p className="text-[11px] leading-5 text-muted-foreground">Describe what your agent does, its tone, and how you’d like it to respond.</p>
       </div>
     </TabsContent>
   );
