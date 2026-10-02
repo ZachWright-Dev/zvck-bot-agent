@@ -2,38 +2,48 @@
 
 import Link from "next/link";
 import { useState, type FormEvent } from "react";
-import { Bot, BotMessageSquare, Plus, Shuffle } from "lucide-react";
+import { Plus, Shuffle } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-
-const avatars = [
-  { name: "Blue robot", icon: Bot, color: "bg-blue-100 text-blue-600 dark:bg-blue-950 dark:text-blue-300" },
-  { name: "Violet chat robot", icon: BotMessageSquare, color: "bg-violet-100 text-violet-600 dark:bg-violet-950 dark:text-violet-300" },
-  { name: "Emerald robot", icon: Bot, color: "bg-emerald-100 text-emerald-600 dark:bg-emerald-950 dark:text-emerald-300" },
-  { name: "Amber chat robot", icon: BotMessageSquare, color: "bg-amber-100 text-amber-600 dark:bg-amber-950 dark:text-amber-300" },
-  { name: "Rose robot", icon: Bot, color: "bg-rose-100 text-rose-600 dark:bg-rose-950 dark:text-rose-300" },
-  { name: "Sky chat robot", icon: BotMessageSquare, color: "bg-sky-100 text-sky-600 dark:bg-sky-950 dark:text-sky-300" },
-];
+import { useRouter } from "next/navigation";
+import axios from "axios";
 
 export default function CreateAgent() {
-  const [avatarIndex, setAvatarIndex] = useState(0);
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
-  const [submitMessage, setSubmitMessage] = useState("");
-  const avatar = avatars[avatarIndex];
-  const AvatarIcon = avatar.icon;
+  const [name, setName] = useState<string>("");
+  const [description, setDescription] = useState<string>("");
+  const [submitMessage, setSubmitMessage] = useState<string>("");
+  // Keep the initial image identical on the server and during hydration.
+  const [avatarSeed, setAvatarSeed] = useState<string>("default-agent");
+  
+  const router = useRouter();
+  const avatarImageUrl: string = `https://api.dicebear.com/10.x/gaze/svg?seed=${avatarSeed}`;
 
   function shuffleAvatar() {
-    // A nonzero offset always selects a different avatar.
-    setAvatarIndex((current) => (current + 1 + Math.floor(Math.random() * (avatars.length - 1))) % avatars.length);
+    setAvatarSeed(crypto.randomUUID());
+
   }
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    // Connect agent persistence here when the creation API is available.
+    
+    console.log(avatarImageUrl, name, description, submitMessage);
+    
+    try {
+      const agentId = crypto.randomUUID();
+      const response = await axios.post('/api/agent', {
+        agentId,
+        agentImage: avatarImageUrl,
+        name,
+        description,
+      });
+      console.log(response);
+      router.push("/workspace/" + agentId);
+    } catch(e) {
+      console.error(`Creating agent threw an error ${e}`);
+    }
     setSubmitMessage("Agent creation is not available yet. Your details have been kept in this form.");
   }
 
@@ -51,12 +61,10 @@ export default function CreateAgent() {
           <div className="flex flex-col items-center gap-4 pb-2">
             <div
               role="img"
-              aria-label={avatar.name}
-              className={`flex size-28 items-center justify-center rounded-3xl ring-8 ring-muted/50 transition-colors ${avatar.color}`}
+              className={'flex size-28 items-center justify-center rounded-3xl'}
             >
-              <AvatarIcon className="size-14" strokeWidth={1.5} aria-hidden="true" />
+              <img src={avatarImageUrl} alt="" />
             </div>
-            <span className="sr-only" role="status">Selected avatar: {avatar.name}</span>
             <Button type="button" variant="outline" onClick={shuffleAvatar} className="mt-2 h-9 gap-2 px-3 text-muted-foreground">
               <Shuffle className="size-4" aria-hidden="true" />
               Shuffle Image
