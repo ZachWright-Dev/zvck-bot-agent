@@ -5,6 +5,9 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { Bot, Code2, Compass, Plus, Search, Store, UserRound } from "lucide-react";
+import { useState, useEffect } from "react";
+import axios from "axios";
+import { AgentConfig } from "@/types/Agent";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -31,6 +34,7 @@ const sampleAgents = [
 ];
 
 export default function AppSideBar() {
+  const [agents, setAgents] = useState<AgentConfig[]>([]);
   const pathname = usePathname();
   const { data: session, status } = useSession();
   const { setOpenMobile } = useSidebar();
@@ -39,6 +43,17 @@ export default function AppSideBar() {
   const initials = username.split(/\s+/).slice(0, 2).map((part) => part[0]).join("").toUpperCase();
   const closeMobileSidebar = () => setOpenMobile(false);
   const isActive = (href: string) => pathname === href || pathname.startsWith(`${href}/`);
+
+
+  const fetchAgents = async() => {
+    const response = await axios.get('/api/agent');
+    const fetchedAgents: AgentConfig[] = response.data.agents;
+    setAgents(fetchedAgents);
+  }
+
+  useEffect(() => {
+    fetchAgents();  
+  }, [pathname])
 
   return (
     <Sidebar className="border-sidebar-border/70">
@@ -81,11 +96,10 @@ export default function AppSideBar() {
           <SidebarGroupContent>
             <nav aria-labelledby="your-agents-label">
               <SidebarMenu className="gap-1">
-                {sampleAgents.map((agent) => {
-                  const href = `/workspace/agents/${agent.id}`;
-                  const Icon = agent.icon;
+                {agents.map((agent) => {
+                  const href = `/workspace/agents/${agent.agentId}`;
                   return (
-                    <SidebarMenuItem key={agent.id}>
+                    <SidebarMenuItem key={agent.agentId}>
                       <SidebarMenuButton
                         render={<Link href={href} onClick={closeMobileSidebar} />}
                         isActive={isActive(href)}
@@ -93,8 +107,11 @@ export default function AppSideBar() {
                         className="h-14 gap-3 rounded-xl px-3 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground data-active:bg-blue-50 data-active:text-blue-700 dark:data-active:bg-blue-950/50 dark:data-active:text-blue-300"
                       >
                         <Avatar className="size-9 rounded-xl after:rounded-xl">
-                          <AvatarFallback className={`rounded-xl ${agent.color}`}>
-                            <Icon className="size-4" aria-hidden="true" />
+                          {agent.agentImage && (
+                            <AvatarImage className="rounded-xl" src={agent.agentImage} alt="" />
+                          )}
+                          <AvatarFallback className="rounded-xl">
+                            <Bot className="size-4" aria-hidden="true" />
                           </AvatarFallback>
                         </Avatar>
                         <span className="truncate font-medium">{agent.name}</span>
