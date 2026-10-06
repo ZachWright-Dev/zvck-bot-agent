@@ -49,6 +49,16 @@ export default function AppSideBar() {
     fetchAgents();  
   }, [pathname])
 
+  useEffect(() => {
+    function handleAgentSaved(event: Event) {
+      const savedAgent = (event as CustomEvent<AgentConfig>).detail;
+      setAgents((current) => current.map((agent) => agent.agentId === savedAgent.agentId ? savedAgent : agent));
+    }
+
+    window.addEventListener("agent-saved", handleAgentSaved);
+    return () => window.removeEventListener("agent-saved", handleAgentSaved);
+  }, []);
+
   return (
     <Sidebar className="border-sidebar-border/70">
       <SidebarHeader className="gap-7 px-5 pt-7 pb-6">

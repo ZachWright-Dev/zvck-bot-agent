@@ -30,6 +30,9 @@ export async function POST(req: NextRequest) {
     }
 }
 
+// TODO: Add a PATCH endpoint to save the name and description for an agent owned
+// by the signed-in user, returning the saved record as { agent }.
+
 export async function GET(req: NextRequest) {
     const session = await getServerSession(authOptions);
 

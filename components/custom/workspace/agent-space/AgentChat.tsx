@@ -1,17 +1,21 @@
+"use client";
+
 import { Send, Sparkles } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
-import type { AgentConfig } from "@/types/Agent";
+import { useAgent } from "./AgentProvider";
 import { AgentAvatar } from "./AgentPreview";
 
-export default function AgentChat({ agent }: { agent: AgentConfig }) {
+export default function AgentChat() {
+  const { agent } = useAgent();
+
   return (
     <section aria-label="Agent chat" className="flex h-[44rem] max-h-[calc(100dvh-4rem)] min-h-[32rem] min-w-0 flex-1 flex-col lg:h-auto lg:max-h-none lg:min-h-0">
       <header className="flex min-h-22 shrink-0 flex-wrap items-center justify-between gap-3 border-b px-5 py-4 xl:px-7">
         <div className="flex min-w-0 items-center gap-3">
-          <AgentAvatar agentImage={agent.agentImage} />
+          <AgentAvatar />
           <div className="min-w-0">
             <h1 className="truncate text-base font-semibold tracking-tight">{agent.name}</h1>
             <p className="mt-0.5 text-xs text-muted-foreground">Your everyday copilot</p>
@@ -32,7 +36,7 @@ export default function AgentChat({ agent }: { agent: AgentConfig }) {
           </div>
 
           <div className="flex items-start gap-3">
-            <AgentAvatar agentImage={agent.agentImage} className="size-8" />
+            <AgentAvatar className="size-8" />
             <div className="min-w-0 max-w-[90%] space-y-2">
               <p className="text-xs font-medium">{agent.name} <span className="ml-2 font-normal text-muted-foreground">9:00 AM</span></p>
               <div className="rounded-2xl rounded-tl-sm bg-muted/60 px-4 py-3 text-sm leading-7">
@@ -49,7 +53,7 @@ export default function AgentChat({ agent }: { agent: AgentConfig }) {
           </div>
 
           <div className="flex items-start gap-3">
-            <AgentAvatar agentImage={agent.agentImage} className="size-8" />
+            <AgentAvatar className="size-8" />
             <div className="min-w-0 max-w-[90%] space-y-2">
               <p className="text-xs font-medium">{agent.name} <span className="ml-2 font-normal text-muted-foreground">9:01 AM</span></p>
               <div className="space-y-3 rounded-2xl rounded-tl-sm bg-muted/60 px-4 py-3 text-sm leading-7">

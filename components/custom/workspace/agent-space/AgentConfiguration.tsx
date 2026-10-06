@@ -1,3 +1,5 @@
+"use client";
+
 import {
   CalendarDays, Check, ChevronRight, Clock3, Copy, FileText,
   Github, Hash, Mail, Pause, Plug, RotateCcw, Save, Settings2,
@@ -11,13 +13,9 @@ import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import type { AgentConfig } from "@/types/Agent";
+import { useAgent } from "./AgentProvider";
+import { useState } from "react";
 import { AgentAvatar } from "./AgentPreview";
-
-type AgentConfigurationProps = {
-  agent: AgentConfig;
-  onAgentChange: (changes: Partial<Pick<AgentConfig, "name" | "description">>) => void;
-};
 
 const configurationTabs = [
   { value: "settings", label: "Settings", icon: SlidersHorizontal },
@@ -34,7 +32,11 @@ const tools = [
   { name: "GitHub", description: "Repositories and issues", icon: Github, color: "bg-muted text-foreground" },
 ];
 
-function SettingsPanel({ description, onDescriptionChange }: { description: string; onDescriptionChange: (description: string) => void }) {
+function SettingsPanel({ description, onDescriptionChange, isSaving }: {
+  description: string;
+  onDescriptionChange: (description: string) => void;
+  isSaving: boolean;
+}) {
   return (
     <TabsContent value="settings" className="space-y-6">
       <div>
@@ -43,7 +45,7 @@ function SettingsPanel({ description, onDescriptionChange }: { description: stri
       </div>
       <div className="space-y-2">
         <Label htmlFor="agent-description-instructions" className="text-xs">Description and Instructions</Label>
-        <Textarea id="agent-description-instructions" value={description} onChange={(event) => onDescriptionChange(event.target.value)} rows={12} className="min-h-64 resize-y bg-background text-sm leading-6" />
+        <Textarea id="agent-description-instructions" value={description} onChange={(event) => onDescriptionChange(event.target.value)} disabled={isSaving} rows={12} className="min-h-64 resize-y bg-background text-sm leading-6" />
         <p className="text-[11px] leading-5 text-muted-foreground">Describe what your agent does, its tone, and how you’d like it to respond.</p>
       </div>
     </TabsContent>
@@ -150,7 +152,32 @@ function AgentSettingsPanel() {
   );
 }
 
-export default function AgentConfiguration({ agent, onAgentChange }: AgentConfigurationProps) {
+export default function AgentConfiguration() {
+  const { agent, saveAgent } = useAgent();
+  const [draft, setDraft] = useState({ name: agent.name, description: agent.description ?? "" });
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const hasChanges = draft.name !== agent.name || draft.description !== (agent.description ?? "");
+
+  async function handleSave() {
+    if (isSaving || !hasChanges) return;
+    if (!draft.name.trim()) {
+      setSaveError("Enter an agent name before saving.");
+      return;
+    }
+
+    setIsSaving(true);
+    setSaveError(null);
+    try {
+      const savedAgent = await saveAgent(draft);
+      setDraft({ name: savedAgent.name, description: savedAgent.description ?? "" });
+    } catch {
+      setSaveError("Unable to save changes. Your edits are still here. Please try again.");
+    } finally {
+      setIsSaving(false);
+    }
+  }
+
   return (
     <aside aria-labelledby="agent-configuration-title" className="flex min-w-0 shrink-0 flex-col border-t bg-muted/20 lg:w-[360px] lg:border-t-0 lg:border-l xl:w-[400px] 2xl:w-[420px]">
       <header className="flex min-h-22 shrink-0 items-center justify-between gap-3 border-b px-5 py-4 xl:px-6">
@@ -158,13 +185,15 @@ export default function AgentConfiguration({ agent, onAgentChange }: AgentConfig
           <h2 id="agent-configuration-title" className="text-sm font-semibold">Agent Configuration</h2>
           <p className="mt-1 text-[11px] text-muted-foreground">Tailor your agent to you</p>
         </div>
-        <Button type="button" className="h-9 gap-2 bg-blue-600 px-3 text-white hover:bg-blue-700"><Save className="size-3.5" aria-hidden="true" />Save</Button>
+        <Button type="button" onClick={handleSave} disabled={isSaving || !hasChanges} className="h-9 gap-2 bg-blue-600 px-3 text-white hover:bg-blue-700"><Save className="size-3.5" aria-hidden="true" />{isSaving ? "Saving…" : "Save"}</Button>
       </header>
+
+      {saveError && <p role="alert" className="px-5 pt-4 text-sm text-destructive xl:px-6">{saveError}</p>}
 
       <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
         <div className="space-y-5 px-5 py-6 xl:px-6">
           <div className="flex items-center gap-4">
-            <AgentAvatar agentImage={agent.agentImage} className="size-16" />
+            <AgentAvatar className="size-16" />
             <div>
               <p className="mb-2 text-xs font-medium">Agent avatar</p>
               <Button type="button" variant="outline" size="sm" className="gap-2 text-xs"><Shuffle className="size-3.5" aria-hidden="true" />Shuffle Avatar</Button>
@@ -172,7 +201,10 @@ export default function AgentConfiguration({ agent, onAgentChange }: AgentConfig
           </div>
           <div className="space-y-2">
             <Label htmlFor="agent-name" className="text-xs">Agent Name</Label>
-            <Input id="agent-name" value={agent.name} onChange={(event) => onAgentChange({ name: event.target.value })} className="h-10 bg-background text-sm" />
+            <Input id="agent-name" value={draft.name} onChange={(event) => {
+              setDraft((current) => ({ ...current, name: event.target.value }));
+              setSaveError(null);
+            }} disabled={isSaving} className="h-10 bg-background text-sm" />
           </div>
         </div>
 
@@ -190,7 +222,10 @@ export default function AgentConfiguration({ agent, onAgentChange }: AgentConfig
             </TabsList>
           </div>
           <div className="p-5 xl:p-6">
-            <SettingsPanel description={agent.description ?? ""} onDescriptionChange={(description) => onAgentChange({ description })} />
+            <SettingsPanel description={draft.description} onDescriptionChange={(description) => {
+              setDraft((current) => ({ ...current, description }));
+              setSaveError(null);
+            }} isSaving={isSaving} />
             <ToolsPanel />
             <SchedulePanel />
             <AgentSettingsPanel />
@@ -198,8 +233,9 @@ export default function AgentConfiguration({ agent, onAgentChange }: AgentConfig
         </Tabs>
       </div>
 
-      <footer className="flex shrink-0 items-center gap-2 border-t px-5 py-3 text-[11px] text-muted-foreground xl:px-6">
-        <Check className="size-3.5" aria-hidden="true" />UI preview · Changes are not saved
+      <footer role="status" className="flex shrink-0 items-center gap-2 border-t px-5 py-3 text-[11px] text-muted-foreground xl:px-6">
+        {!isSaving && !hasChanges && <Check className="size-3.5" aria-hidden="true" />}
+        {isSaving ? "Saving changes…" : hasChanges ? "Unsaved changes" : "Name and description are up to date"}
       </footer>
     </aside>
   );
