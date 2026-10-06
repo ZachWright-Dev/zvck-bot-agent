@@ -26,12 +26,6 @@ import {
 } from "@/components/ui/sidebar";
 
 // Replace these samples with the signed-in user's agents when that API is ready.
-const sampleAgents = [
-  { id: "personal-assistant", name: "Personal Assistant", icon: Bot, color: "bg-blue-100 text-blue-600 dark:bg-blue-950 dark:text-blue-300" },
-  { id: "research-assistant", name: "Research Assistant", icon: Search, color: "bg-violet-100 text-violet-600 dark:bg-violet-950 dark:text-violet-300" },
-  { id: "code-companion", name: "Code Companion", icon: Code2, color: "bg-emerald-100 text-emerald-600 dark:bg-emerald-950 dark:text-emerald-300" },
-  { id: "travel-planner", name: "Travel Planner", icon: Compass, color: "bg-amber-100 text-amber-600 dark:bg-amber-950 dark:text-amber-300" },
-];
 
 export default function AppSideBar() {
   const [agents, setAgents] = useState<AgentConfig[]>([]);

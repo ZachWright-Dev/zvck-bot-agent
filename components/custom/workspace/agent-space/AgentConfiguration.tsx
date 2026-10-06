@@ -11,7 +11,13 @@ import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { AgentAvatar, previewAgent } from "./AgentPreview";
+import type { AgentConfig } from "@/types/Agent";
+import { AgentAvatar } from "./AgentPreview";
+
+type AgentConfigurationProps = {
+  agent: AgentConfig;
+  onAgentChange: (changes: Partial<Pick<AgentConfig, "name" | "description">>) => void;
+};
 
 const configurationTabs = [
   { value: "settings", label: "Settings", icon: SlidersHorizontal },
@@ -28,7 +34,7 @@ const tools = [
   { name: "GitHub", description: "Repositories and issues", icon: Github, color: "bg-muted text-foreground" },
 ];
 
-function SettingsPanel() {
+function SettingsPanel({ description, onDescriptionChange }: { description: string; onDescriptionChange: (description: string) => void }) {
   return (
     <TabsContent value="settings" className="space-y-6">
       <div>
@@ -37,7 +43,7 @@ function SettingsPanel() {
       </div>
       <div className="space-y-2">
         <Label htmlFor="agent-description-instructions" className="text-xs">Description and Instructions</Label>
-        <Textarea id="agent-description-instructions" defaultValue={previewAgent.descriptionAndInstructions} rows={12} className="min-h-64 resize-y bg-background text-sm leading-6" />
+        <Textarea id="agent-description-instructions" value={description} onChange={(event) => onDescriptionChange(event.target.value)} rows={12} className="min-h-64 resize-y bg-background text-sm leading-6" />
         <p className="text-[11px] leading-5 text-muted-foreground">Describe what your agent does, its tone, and how you’d like it to respond.</p>
       </div>
     </TabsContent>
@@ -144,7 +150,7 @@ function AgentSettingsPanel() {
   );
 }
 
-export default function AgentConfiguration() {
+export default function AgentConfiguration({ agent, onAgentChange }: AgentConfigurationProps) {
   return (
     <aside aria-labelledby="agent-configuration-title" className="flex min-w-0 shrink-0 flex-col border-t bg-muted/20 lg:w-[360px] lg:border-t-0 lg:border-l xl:w-[400px] 2xl:w-[420px]">
       <header className="flex min-h-22 shrink-0 items-center justify-between gap-3 border-b px-5 py-4 xl:px-6">
@@ -158,7 +164,7 @@ export default function AgentConfiguration() {
       <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
         <div className="space-y-5 px-5 py-6 xl:px-6">
           <div className="flex items-center gap-4">
-            <AgentAvatar className="size-16" />
+            <AgentAvatar agentImage={agent.agentImage} className="size-16" />
             <div>
               <p className="mb-2 text-xs font-medium">Agent avatar</p>
               <Button type="button" variant="outline" size="sm" className="gap-2 text-xs"><Shuffle className="size-3.5" aria-hidden="true" />Shuffle Avatar</Button>
@@ -166,7 +172,7 @@ export default function AgentConfiguration() {
           </div>
           <div className="space-y-2">
             <Label htmlFor="agent-name" className="text-xs">Agent Name</Label>
-            <Input id="agent-name" defaultValue={previewAgent.name} className="h-10 bg-background text-sm" />
+            <Input id="agent-name" value={agent.name} onChange={(event) => onAgentChange({ name: event.target.value })} className="h-10 bg-background text-sm" />
           </div>
         </div>
 
@@ -184,7 +190,7 @@ export default function AgentConfiguration() {
             </TabsList>
           </div>
           <div className="p-5 xl:p-6">
-            <SettingsPanel />
+            <SettingsPanel description={agent.description ?? ""} onDescriptionChange={(description) => onAgentChange({ description })} />
             <ToolsPanel />
             <SchedulePanel />
             <AgentSettingsPanel />

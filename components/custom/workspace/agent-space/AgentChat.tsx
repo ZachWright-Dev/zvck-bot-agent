@@ -3,16 +3,17 @@ import { Send, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
-import { AgentAvatar, previewAgent } from "./AgentPreview";
+import type { AgentConfig } from "@/types/Agent";
+import { AgentAvatar } from "./AgentPreview";
 
-export default function AgentChat() {
+export default function AgentChat({ agent }: { agent: AgentConfig }) {
   return (
     <section aria-label="Agent chat" className="flex h-[44rem] max-h-[calc(100dvh-4rem)] min-h-[32rem] min-w-0 flex-1 flex-col lg:h-auto lg:max-h-none lg:min-h-0">
       <header className="flex min-h-22 shrink-0 flex-wrap items-center justify-between gap-3 border-b px-5 py-4 xl:px-7">
         <div className="flex min-w-0 items-center gap-3">
-          <AgentAvatar />
+          <AgentAvatar agentImage={agent.agentImage} />
           <div className="min-w-0">
-            <h1 className="truncate text-base font-semibold tracking-tight">{previewAgent.name}</h1>
+            <h1 className="truncate text-base font-semibold tracking-tight">{agent.name}</h1>
             <p className="mt-0.5 text-xs text-muted-foreground">Your everyday copilot</p>
           </div>
         </div>
@@ -31,9 +32,9 @@ export default function AgentChat() {
           </div>
 
           <div className="flex items-start gap-3">
-            <AgentAvatar className="size-8" />
+            <AgentAvatar agentImage={agent.agentImage} className="size-8" />
             <div className="min-w-0 max-w-[90%] space-y-2">
-              <p className="text-xs font-medium">{previewAgent.name} <span className="ml-2 font-normal text-muted-foreground">9:00 AM</span></p>
+              <p className="text-xs font-medium">{agent.name} <span className="ml-2 font-normal text-muted-foreground">9:00 AM</span></p>
               <div className="rounded-2xl rounded-tl-sm bg-muted/60 px-4 py-3 text-sm leading-7">
                 Hi there! I’m your personal assistant. I can help you plan your day, explore ideas, or make a little more room for what matters. What’s on your mind?
               </div>
@@ -48,9 +49,9 @@ export default function AgentChat() {
           </div>
 
           <div className="flex items-start gap-3">
-            <AgentAvatar className="size-8" />
+            <AgentAvatar agentImage={agent.agentImage} className="size-8" />
             <div className="min-w-0 max-w-[90%] space-y-2">
-              <p className="text-xs font-medium">{previewAgent.name} <span className="ml-2 font-normal text-muted-foreground">9:01 AM</span></p>
+              <p className="text-xs font-medium">{agent.name} <span className="ml-2 font-normal text-muted-foreground">9:01 AM</span></p>
               <div className="space-y-3 rounded-2xl rounded-tl-sm bg-muted/60 px-4 py-3 text-sm leading-7">
                 <p>Let’s keep it simple. Here’s a little structure for your morning:</p>
                 <ul className="space-y-2">

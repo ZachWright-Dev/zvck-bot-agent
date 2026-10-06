@@ -2,8 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { authOptions } from "../auth/[...nextauth]/route";
 import { getServerSession } from "next-auth";
 import { agentConfig, db } from "@/db";
-import { useSession } from "next-auth/react";
-import { desc, eq } from "drizzle-orm";
+import { desc, eq, and } from "drizzle-orm";
 
 export async function POST(req: NextRequest) {
     const session = await getServerSession(authOptions);
@@ -38,13 +37,28 @@ export async function GET(req: NextRequest) {
         return NextResponse.json({message: "Unauthorized"}, {status: 400});
     }
 
+    // If agentId return one agent
+    const agentId  = req.nextUrl.searchParams.get('agentId');
+    if(agentId) {
+        try {
+            const agentConfigResult = await db.select()
+                .from(agentConfig)
+                .where(and(eq(agentConfig.userEmail, session.user.email), eq(agentConfig.agentId, agentId)));
+            
+            console.log(agentConfigResult);
+            return NextResponse.json({agent: agentConfigResult[0]}, {status: 200});
+        } catch (e) {
+            return NextResponse.json({message: "Internal Sever Error"}, {status: 500});
+        }
+    }
+
     // Get all agentConfigs for a given email
     try {
         const agentConfigs = await db.select()
             .from(agentConfig)
             .where(eq(agentConfig.userEmail, session.user.email))
             .orderBy(desc(agentConfig.createdAt));
-            
+
         return NextResponse.json({agents: agentConfigs}, {status: 200});
     } catch(e) {
         return NextResponse.json({message: "Internal Server Error"}, {status: 500});
